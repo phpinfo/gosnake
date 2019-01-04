@@ -17,7 +17,7 @@ func (renderer *Renderer) Init() {
 		panic(err)
 	}
 
-	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
+	termbox.SetInputMode(termbox.InputEsc)
 }
 
 func (renderer Renderer) Close() {

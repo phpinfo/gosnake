@@ -32,6 +32,7 @@ type Game struct {
 	Box      *Rect
 	Food     *Food
 	isQuit   bool
+	isPause  bool
 }
 
 func NewGame() (*Game) {
@@ -49,6 +50,7 @@ func NewGame() (*Game) {
 		Box:      rect,
 		Food:     food,
 		isQuit:   false,
+		isPause:  false,
 	}
 
 	lblScore := NewCounter(&game.score, NewPoint(ScoreX, ScoreY))
@@ -75,6 +77,8 @@ func (game *Game) Start() {
 		select {
 		case event := <-eventQueue:
 			game.handleKeyEvents(event)
+			game.handleControlKeyEvents(event)
+
 		default:
 			if game.isQuit {
 				break loop
@@ -93,6 +97,25 @@ func (game *Game) handleKeyEvents(event termbox.Event) {
 	case termbox.KeyEsc:
 		game.quit()
 		break
+	}
+
+	switch event.Ch {
+	case 'p':
+		game.isPause = !game.isPause
+		break
+	}
+}
+
+func (game *Game) handleControlKeyEvents(event termbox.Event) {
+	if game.isPause {
+		return
+	}
+
+	if event.Type != termbox.EventKey {
+		return
+	}
+
+	switch event.Key {
 	case termbox.KeyArrowLeft:
 		game.Snake.SetDirection(DirectionLeft)
 		break
@@ -109,18 +132,21 @@ func (game *Game) handleKeyEvents(event termbox.Event) {
 }
 
 func (game *Game) tick() {
-	snake := game.Snake
-	snake.Move()
+	if game.isPause {
+		return
+	}
+
+	game.Snake.Move()
 
 	if game.isCollision() {
 		game.quit()
 		return
 	}
 
-	if snake.Head().Equals(game.Food.Point) {
-		snake.Eat()
+	if game.isFood() {
+		game.Snake.Eat()
 		game.score++
-		game.Food = initFood(game.Box, snake)
+		game.Food = initFood(game.Box, game.Snake)
 	}
 
 	game.Render()
@@ -139,6 +165,10 @@ func (game *Game) isCollision() bool {
 	return false
 }
 
+func (game *Game) isFood() bool {
+	return game.Snake.Head().Equals(game.Food.Point)
+}
+
 func (game *Game) getMoveInterval() time.Duration {
 	ms := 100 - game.score / 1
 	return time.Duration(ms) * time.Millisecond
@@ -146,6 +176,11 @@ func (game *Game) getMoveInterval() time.Duration {
 
 func (game *Game) quit() {
 	game.isQuit = true
+}
+
+func (game *Game) pause() {
+	game.isPause = !game.isPause
+
 }
 
 func initSnake(rect *Rect, length int) *Snake {
