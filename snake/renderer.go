@@ -29,8 +29,8 @@ func (game *Game) Render () {
 
 	game.lblTitle.Render()
 	game.lblScore.Render()
-	game.Box.Rect.Render()
-	game.Box.Snake.Render()
+	game.Box.Render()
+	game.Snake.Render()
 	game.Food.Render()
 
 	termbox.Flush()

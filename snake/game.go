@@ -12,7 +12,7 @@ const (
 	BoxRectWidth  = 50
 	BoxRectHeight = 25
 
-	SnakeInitialLength = 10
+	SnakeLength = 4
 
 	TitleText = "Go Snake!"
 	TitleX    = 1
@@ -28,24 +28,25 @@ type Game struct {
 	Renderer *Renderer
 	lblTitle *Label
 	lblScore *Counter
-	Box      *Box
+	Snake    *Snake
+	Box      *Rect
 	Food     *Food
 	isQuit   bool
 }
 
 func NewGame() (*Game) {
 	var (
-		boxRect  = NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
-		snake    = initSnake(boxRect, SnakeInitialLength)
-		box      = NewBox(boxRect, snake)
-		food     = initFood(boxRect, snake)
+		rect  = NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
+		snake = initSnake(rect, SnakeLength)
+		food  = initFood(rect, snake)
 	)
 
 	game := &Game{
 		score:    ScoreValue,
 		Renderer: NewRenderer(),
 		lblTitle: NewLabel(TitleText, NewPoint(TitleX, TitleY)),
-		Box:      box,
+		Snake:    snake,
+		Box:      rect,
 		Food:     food,
 		isQuit:   false,
 	}
@@ -93,22 +94,22 @@ func (game *Game) handleKeyEvents(event termbox.Event) {
 		game.quit()
 		break
 	case termbox.KeyArrowLeft:
-		game.Box.Snake.SetDirection(DirectionLeft)
+		game.Snake.SetDirection(DirectionLeft)
 		break
 	case termbox.KeyArrowRight:
-		game.Box.Snake.SetDirection(DirectionRight)
+		game.Snake.SetDirection(DirectionRight)
 		break
 	case termbox.KeyArrowUp:
-		game.Box.Snake.SetDirection(DirectionUp)
+		game.Snake.SetDirection(DirectionUp)
 		break
 	case termbox.KeyArrowDown:
-		game.Box.Snake.SetDirection(DirectionDown)
+		game.Snake.SetDirection(DirectionDown)
 		break
 	}
 }
 
 func (game *Game) tick() {
-	snake := game.Box.Snake
+	snake := game.Snake
 	snake.Move()
 
 	if game.isCollision() {
@@ -119,7 +120,7 @@ func (game *Game) tick() {
 	if snake.Head().Equals(game.Food.Point) {
 		snake.Eat()
 		game.score++
-		game.Food = initFood(game.Box.Rect, snake)
+		game.Food = initFood(game.Box, snake)
 	}
 
 	game.Render()
@@ -127,11 +128,11 @@ func (game *Game) tick() {
 }
 
 func (game *Game) isCollision() bool {
-	if !game.Box.Rect.Contains(game.Box.Snake.Head()) {
+	if !game.Box.Contains(game.Snake.Head()) {
 		return true
 	}
 
-	if game.Box.Snake.SelfCollides() {
+	if game.Snake.SelfCollides() {
 		return true
 	}
 
@@ -139,7 +140,7 @@ func (game *Game) isCollision() bool {
 }
 
 func (game *Game) getMoveInterval() time.Duration {
-	ms := 100 - game.score / 10
+	ms := 100 - game.score / 1
 	return time.Duration(ms) * time.Millisecond
 }
 
