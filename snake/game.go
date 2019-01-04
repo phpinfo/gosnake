@@ -33,6 +33,7 @@ type Game struct {
 	Food     *Food
 	isQuit   bool
 	isPause  bool
+	aPause   *Alert
 }
 
 func NewGame() (*Game) {
@@ -51,6 +52,7 @@ func NewGame() (*Game) {
 		Food:     food,
 		isQuit:   false,
 		isPause:  false,
+		aPause:   initPauseAlert(rect),
 	}
 
 	lblScore := NewCounter(&game.score, NewPoint(ScoreX, ScoreY))
@@ -85,49 +87,6 @@ func (game *Game) Start() {
 			}
 			game.tick()
 		}
-	}
-}
-
-func (game *Game) handleKeyEvents(event termbox.Event) {
-	if event.Type != termbox.EventKey {
-		return
-	}
-
-	switch event.Key {
-	case termbox.KeyEsc:
-		game.quit()
-		break
-	}
-
-	switch event.Ch {
-	case 'p':
-		game.isPause = !game.isPause
-		break
-	}
-}
-
-func (game *Game) handleControlKeyEvents(event termbox.Event) {
-	if game.isPause {
-		return
-	}
-
-	if event.Type != termbox.EventKey {
-		return
-	}
-
-	switch event.Key {
-	case termbox.KeyArrowLeft:
-		game.Snake.SetDirection(DirectionLeft)
-		break
-	case termbox.KeyArrowRight:
-		game.Snake.SetDirection(DirectionRight)
-		break
-	case termbox.KeyArrowUp:
-		game.Snake.SetDirection(DirectionUp)
-		break
-	case termbox.KeyArrowDown:
-		game.Snake.SetDirection(DirectionDown)
-		break
 	}
 }
 
@@ -180,7 +139,6 @@ func (game *Game) quit() {
 
 func (game *Game) pause() {
 	game.isPause = !game.isPause
-
 }
 
 func initSnake(rect *Rect, length int) *Snake {
@@ -208,4 +166,20 @@ func initFood(rect *Rect, snake *Snake) *Food {
 			return NewFood(point)
 		}
 	}
+}
+
+func initPauseAlert(rect *Rect) *Alert {
+	text := "          PAUSED\n\n" +
+		    "<Press any key to continue>"
+
+	alert := NewAlert(text, NewPoint(0, 0))
+
+	point := NewPoint(
+		rect.Dimensions.Width / 2 - alert.getWidth() / 2 + rect.Left,
+		rect.Dimensions.Height / 2 - alert.getHeight() / 2 + rect.Top,
+	)
+
+	alert.Move(point)
+
+	return alert
 }

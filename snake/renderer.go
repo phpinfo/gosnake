@@ -32,6 +32,7 @@ func (game *Game) Render () {
 	game.Box.Render()
 	game.Snake.Render()
 	game.Food.Render()
+	game.aPause.Render()
 
 	termbox.Flush()
 }
