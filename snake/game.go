@@ -3,6 +3,7 @@ package snake
 import (
 	"github.com/looplab/fsm"
 	"github.com/nsf/termbox-go"
+	"github.com/phpinfo/gosnake/geometry"
 	"math/rand"
 	"time"
 )
@@ -38,7 +39,7 @@ type Game struct {
 	fsm      *fsm.FSM
 }
 
-func NewGame() (*Game) {
+func NewGame() *Game {
 	var (
 		rect  = NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
 		snake = initSnake(rect, SnakeLength)
@@ -48,7 +49,7 @@ func NewGame() (*Game) {
 	game := &Game{
 		score:    ScoreValue,
 		Renderer: NewRenderer(),
-		lblTitle: NewLabel(TitleText, NewPoint(TitleX, TitleY)),
+		lblTitle: NewLabel(TitleText, geometry.NewPoint(TitleX, TitleY)),
 		Snake:    snake,
 		Box:      rect,
 		Food:     food,
@@ -57,7 +58,7 @@ func NewGame() (*Game) {
 		aPause:   initPauseAlert(rect),
 	}
 
-	lblScore := NewCounter(&game.score, NewPoint(ScoreX, ScoreY))
+	lblScore := NewCounter(&game.score, geometry.NewPoint(ScoreX, ScoreY))
 	game.lblScore = lblScore
 
 	game.fsm = game.initStateMachine()
@@ -177,7 +178,7 @@ func (game *Game) initStateMachine() *fsm.FSM {
 func initSnake(rect *Rect, length int) *Snake {
 	var (
 		point = rect.LeftTopPoint.Add(rect.Dimensions.Width / 2, rect.Dimensions.Height - 2)
-		body = []*Point{point}
+		body = []*geometry.Point{point}
 	)
 
 	for dy := -1; dy > -length; dy-- {
@@ -192,7 +193,7 @@ func initFood(rect *Rect, snake *Snake) *Food {
 		var (
 			x = rand.Intn(rect.Dimensions.Width)
 			y = rand.Intn(rect.Dimensions.Height)
-			point = NewPoint(x, y).Add(rect.Left, rect.Top)
+			point = geometry.NewPoint(x, y).Add(rect.Left, rect.Top)
 		)
 
 		if !snake.Contains(point) {
@@ -205,9 +206,9 @@ func initPauseAlert(rect *Rect) *Alert {
 	text := "          PAUSED\n\n" +
 		    "<Press any key to continue>"
 
-	alert := NewAlert(text, NewPoint(0, 0))
+	alert := NewAlert(text, geometry.NewPoint(0, 0))
 
-	point := NewPoint(
+	point := geometry.NewPoint(
 		rect.Dimensions.Width / 2 - alert.getWidth() / 2 + rect.Left,
 		rect.Dimensions.Height / 2 - alert.getHeight() / 2 + rect.Top,
 	)

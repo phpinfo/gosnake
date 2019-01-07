@@ -1,11 +1,13 @@
 package snake
 
+import "github.com/phpinfo/gosnake/geometry"
+
 type Label struct {
 	text string
-	point *Point
+	point *geometry.Point
 }
 
-func NewLabel (text string, point *Point) *Label {
+func NewLabel (text string, point *geometry.Point) *Label {
 	return &Label{text, point}
 }
 

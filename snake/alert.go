@@ -1,17 +1,18 @@
 package snake
 
 import (
+	"github.com/phpinfo/gosnake/geometry"
 	"strings"
 )
 
 type Alert struct {
 	lines   []string
-	point   *Point
+	point   *geometry.Point
 	rect    *Rect
 	visible bool
 }
 
-func NewAlert(text string, point *Point) *Alert {
+func NewAlert(text string, point *geometry.Point) *Alert {
 	alert := &Alert{
 		lines: strings.Split(text, "\n"),
 		visible: false,
@@ -22,7 +23,7 @@ func NewAlert(text string, point *Point) *Alert {
 	return alert
 }
 
-func (alert *Alert) Move(point *Point) {
+func (alert *Alert) Move(point *geometry.Point) {
 	alert.point = point
 	alert.rect = NewRect(
 		point.X - 1,

@@ -1,14 +1,17 @@
 package snake
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/phpinfo/gosnake/geometry"
+)
 
 type Counter struct {
 	value    *int
-	point    *Point
+	point    *geometry.Point
 	template string
 }
 
-func NewCounter(value *int, point *Point) *Counter {
+func NewCounter(value *int, point *geometry.Point) *Counter {
 	return &Counter{value, point, "%03d"}
 }
 

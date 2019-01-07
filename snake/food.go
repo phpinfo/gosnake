@@ -1,10 +1,12 @@
 package snake
 
+import "github.com/phpinfo/gosnake/geometry"
+
 type Food struct {
-	Point *Point
+	Point *geometry.Point
 }
 
-func NewFood(point *Point) *Food {
+func NewFood(point *geometry.Point) *Food {
 	return &Food{point}
 }
 

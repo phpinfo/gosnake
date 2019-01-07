@@ -1,15 +1,17 @@
 package snake
 
+import "github.com/phpinfo/gosnake/geometry"
+
 type Snake struct {
-	Body      []*Point
+	Body      []*geometry.Point
 	Direction Direction
 }
 
-func NewSnake(body []*Point, direction Direction) *Snake {
+func NewSnake(body []*geometry.Point, direction Direction) *Snake {
 	return &Snake{body, direction}
 }
 
-func (snake *Snake) Head() *Point {
+func (snake *Snake) Head() *geometry.Point {
 	return snake.Body[len(snake.Body) - 1]
 }
 
@@ -32,7 +34,7 @@ func (snake *Snake) Eat() {
 	snake.Body = append(snake.Body, head)
 }
 
-func (snake *Snake) Contains(point *Point) bool {
+func (snake *Snake) Contains(point *geometry.Point) bool {
 	return snake.contains(point, snake.Body)
 }
 
@@ -40,7 +42,7 @@ func (snake *Snake) SelfCollides() bool {
 	return snake.contains(snake.Head(), snake.Body[:len(snake.Body)-1])
 }
 
-func (snake *Snake) contains(point *Point, body []*Point) bool {
+func (snake *Snake) contains(point *geometry.Point, body []*geometry.Point) bool {
 	for _, p := range body {
 		if p.Equals(point) {
 			return true

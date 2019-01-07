@@ -1,4 +1,4 @@
-package snake
+package geometry
 
 type Dimensions struct {
 	Width, Height int

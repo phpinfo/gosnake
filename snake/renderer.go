@@ -2,6 +2,7 @@ package snake
 
 import (
 	"github.com/nsf/termbox-go"
+	"github.com/phpinfo/gosnake/geometry"
 )
 
 type Renderer struct {
@@ -25,7 +26,10 @@ func (renderer Renderer) Close() {
 }
 
 func (game *Game) Render () {
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	e := termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	if e != nil {
+		panic(e)
+	}
 
 	game.lblTitle.Render()
 	game.lblScore.Render()
@@ -34,21 +38,24 @@ func (game *Game) Render () {
 	game.Food.Render()
 	game.aPause.Render()
 
-	termbox.Flush()
-}
-
-func cell(point *Point, ch rune) {
-	termbox.SetCell(point.X, point.Y, ch, termbox.ColorDefault, termbox.ColorDefault)
-}
-
-func hline(p1, p2 *Point, ch rune) {
-	for x := p1.X; x < p2.X; x++ {
-		cell(NewPoint(x, p1.Y), ch)
+	e = termbox.Flush()
+	if e != nil {
+		panic(e)
 	}
 }
 
-func vline(p1, p2 *Point, ch rune) {
+func cell(point *geometry.Point, ch rune) {
+	termbox.SetCell(point.X, point.Y, ch, termbox.ColorDefault, termbox.ColorDefault)
+}
+
+func hline(p1, p2 *geometry.Point, ch rune) {
+	for x := p1.X; x < p2.X; x++ {
+		cell(geometry.NewPoint(x, p1.Y), ch)
+	}
+}
+
+func vline(p1, p2 *geometry.Point, ch rune) {
 	for y := p1.Y; y < p2.Y; y++ {
-		cell(NewPoint(p1.X, y), ch)
+		cell(geometry.NewPoint(p1.X, y), ch)
 	}
 }

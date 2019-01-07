@@ -1,5 +1,7 @@
 package snake
 
+import "github.com/phpinfo/gosnake/geometry"
+
 const (
 	CharCornerLeftTop     = '╔'
 	CharCornerLeftBottom  = '╚'
@@ -10,8 +12,8 @@ const (
 )
 
 type Rect struct {
-	LeftTopPoint, RightTopPoint, LeftBottomPoint, RightBottomPoint *Point
-	Dimensions *Dimensions
+	LeftTopPoint, RightTopPoint, LeftBottomPoint, RightBottomPoint *geometry.Point
+	Dimensions *geometry.Dimensions
 	Left, Top, Right, Bottom int
 }
 
@@ -24,11 +26,11 @@ func NewRect(x, y, w, h int) *Rect {
 	)
 
 	return &Rect{
-		LeftTopPoint:     &Point{left, top},
-		RightTopPoint:    &Point{right, top},
-		LeftBottomPoint:  &Point{left, bottom},
-		RightBottomPoint: &Point{right, bottom},
-		Dimensions:       NewDimensions(w, h),
+		LeftTopPoint:     geometry.NewPoint(left, top),
+		RightTopPoint:    geometry.NewPoint(right, top),
+		LeftBottomPoint:  geometry.NewPoint(left, bottom),
+		RightBottomPoint: geometry.NewPoint(right, bottom),
+		Dimensions:       geometry.NewDimensions(w, h),
 		Left:             left,
 		Top:              top,
 		Right:            right,
@@ -36,7 +38,7 @@ func NewRect(x, y, w, h int) *Rect {
 	}
 }
 
-func (rect *Rect) Contains(point *Point) bool {
+func (rect *Rect) Contains(point *geometry.Point) bool {
 	return point.X >= rect.Left &&
 		point.X < rect.Right &&
 		point.Y >= rect.Top &&
