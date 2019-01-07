@@ -1,9 +1,10 @@
 package snake
 
 import (
-	"time"
+	"github.com/looplab/fsm"
 	"github.com/nsf/termbox-go"
 	"math/rand"
+	"time"
 )
 
 const (
@@ -34,6 +35,7 @@ type Game struct {
 	isQuit   bool
 	isPause  bool
 	aPause   *Alert
+	fsm      *fsm.FSM
 }
 
 func NewGame() (*Game) {
@@ -58,6 +60,8 @@ func NewGame() (*Game) {
 	lblScore := NewCounter(&game.score, NewPoint(ScoreX, ScoreY))
 	game.lblScore = lblScore
 
+	game.fsm = game.initStateMachine()
+
 	return game
 }
 
@@ -73,6 +77,11 @@ func (game *Game) Start() {
 			eventQueue <- termbox.PollEvent()
 		}
 	}()
+
+	e := game.fsm.Event("play")
+	if e != nil {
+		panic(e)
+	}
 
 	loop:
 	for {
@@ -139,6 +148,30 @@ func (game *Game) quit() {
 
 func (game *Game) pause() {
 	game.isPause = !game.isPause
+	e := game.fsm.Event("pause")
+	if e != nil {
+		panic(e)
+	}
+}
+
+func (game *Game) initStateMachine() *fsm.FSM {
+	return fsm.NewFSM(
+		"init",
+		fsm.Events{
+			//{Name: "die", Src: []string{"running"}, Dst: "dead"},
+			{Name: "init",  Src: []string{}, Dst: "init"},
+			{Name: "play",  Src: []string{"init", "paused"}, Dst: "playing"},
+			{Name: "pause", Src: []string{"playing"}, Dst: "paused"},
+		},
+		fsm.Callbacks{
+			"enter_playing": func(event *fsm.Event) {
+				//fmt.Print("Entering playing")
+			},
+			"enter_paused": func(event *fsm.Event) {
+				//fmt.Print("Entering paused")
+			},
+		},
+	)
 }
 
 func initSnake(rect *Rect, length int) *Snake {

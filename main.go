@@ -1,6 +1,6 @@
 package main
 
-import . "./snake"
+import . "github.com/phpinfo/gosnake/snake"
 
 func main() {
 	NewGame().Start()
