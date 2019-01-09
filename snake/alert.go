@@ -2,6 +2,7 @@ package snake
 
 import (
 	"github.com/phpinfo/gosnake/geometry"
+	"github.com/phpinfo/gosnake/renderer"
 	"strings"
 )
 
@@ -33,16 +34,17 @@ func (alert *Alert) Move(point *geometry.Point) {
 	)
 }
 
-func (alert *Alert) Render() {
+func (alert *Alert) Render(renderer renderer.Renderer) {
 	if !alert.visible {
 		return
 	}
 
-	alert.rect.Render()
+	alert.rect.Render(renderer)
 
 	for dy, text := range alert.lines {
-		for dx, c := range text {
-			cell(alert.point.Add(dx, dy), c)
+		for dx, ch := range text {
+			point := alert.point.Add(dx, dy)
+			renderer.Cell(point.X, point.Y, ch)
 		}
 	}
 }

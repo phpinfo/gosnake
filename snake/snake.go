@@ -1,6 +1,9 @@
 package snake
 
-import "github.com/phpinfo/gosnake/geometry"
+import (
+	"github.com/phpinfo/gosnake/geometry"
+	"github.com/phpinfo/gosnake/renderer"
+)
 
 type Snake struct {
 	Body      []*geometry.Point
@@ -51,8 +54,8 @@ func (snake *Snake) contains(point *geometry.Point, body []*geometry.Point) bool
 	return false
 }
 
-func (snake *Snake) Render() {
+func (snake *Snake) Render(renderer renderer.Renderer) {
 	for _, point := range snake.Body {
-		cell(point, '*')
+		renderer.Cell(point.X, point.Y, '*')
 	}
 }

@@ -1,6 +1,9 @@
 package snake
 
-import "github.com/phpinfo/gosnake/geometry"
+import (
+	"github.com/phpinfo/gosnake/geometry"
+	"github.com/phpinfo/gosnake/renderer"
+)
 
 type Label struct {
 	text string
@@ -11,8 +14,9 @@ func NewLabel (text string, point *geometry.Point) *Label {
 	return &Label{text, point}
 }
 
-func (label *Label) Render () {
-	for dx, c := range label.text {
-		cell(label.point.Add(dx, 0), c)
+func (label *Label) Render (renderer renderer.Renderer) {
+	for dx, ch := range label.text {
+		point := label.point.Add(dx, 0)
+		renderer.Cell(point.X, point.Y, ch)
 	}
 }

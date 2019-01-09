@@ -179,12 +179,12 @@ func (game *Game) initStateMachine() *fsm.FSM {
 func (game *Game) render () {
 	game.Renderer.Clear()
 
-	game.lblTitle.Render()
-	game.lblScore.Render()
-	game.Box.Render()
-	game.Snake.Render()
-	game.Food.Render()
-	game.aPause.Render()
+	game.lblTitle.Render(game.Renderer)
+	game.lblScore.Render(game.Renderer)
+	game.Box.Render(game.Renderer)
+	game.Snake.Render(game.Renderer)
+	game.Food.Render(game.Renderer)
+	game.aPause.Render(game.Renderer)
 
 	game.Renderer.Flush()
 }
