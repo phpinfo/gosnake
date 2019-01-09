@@ -4,6 +4,7 @@ import (
 	"github.com/looplab/fsm"
 	"github.com/nsf/termbox-go"
 	"github.com/phpinfo/gosnake/geometry"
+	"github.com/phpinfo/gosnake/renderer"
 	"math/rand"
 	"time"
 )
@@ -27,7 +28,7 @@ const (
 
 type Game struct {
 	score    int
-	Renderer *Renderer
+	Renderer renderer.Renderer
 	lblTitle *Label
 	lblScore *Counter
 	Snake    *Snake
@@ -41,14 +42,14 @@ type Game struct {
 
 func NewGame() *Game {
 	var (
-		rect  = NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
-		snake = initSnake(rect, SnakeLength)
-		food  = initFood(rect, snake)
+		rect     = NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
+		snake    = initSnake(rect, SnakeLength)
+		food     = initFood(rect, snake)
 	)
 
 	game := &Game{
 		score:    ScoreValue,
-		Renderer: NewRenderer(),
+		Renderer: renderer.NewTermboxRenderer(),
 		lblTitle: NewLabel(TitleText, geometry.NewPoint(TitleX, TitleY)),
 		Snake:    snake,
 		Box:      rect,
@@ -118,7 +119,7 @@ func (game *Game) tick() {
 		game.Food = initFood(game.Box, game.Snake)
 	}
 
-	game.Render()
+	game.render()
 	time.Sleep(game.getMoveInterval())
 }
 
@@ -173,6 +174,19 @@ func (game *Game) initStateMachine() *fsm.FSM {
 			},
 		},
 	)
+}
+
+func (game *Game) render () {
+	game.Renderer.Clear()
+
+	game.lblTitle.Render()
+	game.lblScore.Render()
+	game.Box.Render()
+	game.Snake.Render()
+	game.Food.Render()
+	game.aPause.Render()
+
+	game.Renderer.Flush()
 }
 
 func initSnake(rect *Rect, length int) *Snake {
