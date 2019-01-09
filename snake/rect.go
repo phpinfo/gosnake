@@ -3,6 +3,7 @@ package snake
 import (
 	"github.com/phpinfo/gosnake/geometry"
 	"github.com/phpinfo/gosnake/renderer"
+	"github.com/phpinfo/gosnake/ui"
 )
 
 const (
@@ -61,20 +62,8 @@ func (rect *Rect) Render(renderer renderer.Renderer) {
 	renderer.Cell(rightBottomPoint.X, rightBottomPoint.Y, CharCornerRightBottom)
 	renderer.Cell(leftBottomPoint.X, leftBottomPoint.Y, CharCornerLeftBottom)
 
-	hline(renderer, rect.LeftTopPoint.Add(0, -1), rect.RightTopPoint, CharHorizontal)
-	hline(renderer, rect.LeftBottomPoint, rect.RightBottomPoint, CharHorizontal)
-	vline(renderer, rect.LeftTopPoint.Add(-1, 0), rect.LeftBottomPoint, CharVertical)
-	vline(renderer, rect.RightTopPoint, rect.RightBottomPoint, CharVertical)
-}
-
-func hline(renderer renderer.Renderer, p1, p2 *geometry.Point, ch rune) {
-	for x := p1.X; x < p2.X; x++ {
-		renderer.Cell(x, p1.Y, ch)
-	}
-}
-
-func vline(renderer renderer.Renderer,p1, p2 *geometry.Point, ch rune) {
-	for y := p1.Y; y < p2.Y; y++ {
-		renderer.Cell(p1.X, y, ch)
-	}
+	ui.NewLineHorizontal(rect.Left, rect.Right, rect.Top - 1, CharHorizontal).Render(renderer)
+	ui.NewLineHorizontal(rect.Left, rect.Right, rect.Bottom, CharHorizontal).Render(renderer)
+	ui.NewLineVertical(rect.Left - 1, rect.Top, rect.Bottom, CharVertical).Render(renderer)
+	ui.NewLineVertical(rect.Right, rect.Top, rect.Bottom, CharVertical).Render(renderer)
 }
