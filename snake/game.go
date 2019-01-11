@@ -5,6 +5,7 @@ import (
 	"github.com/nsf/termbox-go"
 	"github.com/phpinfo/gosnake/geometry"
 	"github.com/phpinfo/gosnake/renderer"
+	"github.com/phpinfo/gosnake/ui"
 	"math/rand"
 	"time"
 )
@@ -29,7 +30,7 @@ const (
 type Game struct {
 	score    int
 	Renderer renderer.Renderer
-	lblTitle *Label
+	lblTitle *ui.Label
 	lblScore *Counter
 	Snake    *Snake
 	Box      *Rect
@@ -38,6 +39,7 @@ type Game struct {
 	isPause  bool
 	aPause   *Alert
 	fsm      *fsm.FSM
+	ui       *ui.UI
 }
 
 func NewGame() *Game {
@@ -45,18 +47,20 @@ func NewGame() *Game {
 		rect     = NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
 		snake    = initSnake(rect, SnakeLength)
 		food     = initFood(rect, snake)
+		r        = renderer.NewTermboxRenderer()
 	)
 
 	game := &Game{
 		score:    ScoreValue,
-		Renderer: renderer.NewTermboxRenderer(),
-		lblTitle: NewLabel(TitleText, geometry.NewPoint(TitleX, TitleY)),
+		Renderer: r,
+		lblTitle: ui.NewLabel(TitleText, TitleX, TitleY),
 		Snake:    snake,
 		Box:      rect,
 		Food:     food,
 		isQuit:   false,
 		isPause:  false,
 		aPause:   initPauseAlert(rect),
+		ui:       ui.NewUI(r),
 	}
 
 	lblScore := NewCounter(&game.score, geometry.NewPoint(ScoreX, ScoreY))
@@ -179,12 +183,13 @@ func (game *Game) initStateMachine() *fsm.FSM {
 func (game *Game) render () {
 	game.Renderer.Clear()
 
-	game.lblTitle.Render(game.Renderer)
 	game.lblScore.Render(game.Renderer)
 	game.Box.Render(game.Renderer)
 	game.Snake.Render(game.Renderer)
 	game.Food.Render(game.Renderer)
 	game.aPause.Render(game.Renderer)
+
+	game.ui.Render(game.lblTitle)
 
 	game.Renderer.Flush()
 }
