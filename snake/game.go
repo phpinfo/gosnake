@@ -30,7 +30,6 @@ const (
 type Game struct {
 	score      int
 	Renderer   renderer.Renderer
-	lblScore   *Counter
 	Snake      *Snake
 	Box        *geometry.Rect
 	Food       *Food
@@ -49,15 +48,6 @@ func NewGame() *Game {
 		r        = renderer.NewTermboxRenderer()
 	)
 
-	uiElements := ui.NewComposite()
-
-	lblTitle := ui.NewLabel(TitleText, TitleX, TitleY)
-	uiElements.Append(lblTitle)
-
-	boxBorderRect := geometry.NewRect(BoxRectX - 1, BoxRectY - 1, BoxRectWidth + 2, BoxRectHeight + 2)
-	uiRect := ui.NewRect(boxBorderRect)
-	uiElements.Append(uiRect)
-
 	game := &Game{
 		score:      ScoreValue,
 		Renderer:   r,
@@ -67,13 +57,10 @@ func NewGame() *Game {
 		isQuit:     false,
 		isPause:    false,
 		ui:         ui.NewUI(r),
-		uiElements: uiElements,
 	}
 
-	lblScore := NewCounter(&game.score, geometry.NewPoint(ScoreX, ScoreY))
-	game.lblScore = lblScore
-
-	game.fsm = game.initStateMachine()
+	game.initUiElements()
+	game.initStateMachine()
 
 	return game
 }
@@ -167,8 +154,8 @@ func (game *Game) pause() {
 	}
 }
 
-func (game *Game) initStateMachine() *fsm.FSM {
-	return fsm.NewFSM(
+func (game *Game) initStateMachine() {
+	game.fsm = fsm.NewFSM(
 		"init",
 		fsm.Events{
 			//{Name: "die", Src: []string{"running"}, Dst: "dead"},
@@ -190,13 +177,26 @@ func (game *Game) initStateMachine() *fsm.FSM {
 func (game *Game) render () {
 	game.Renderer.Clear()
 
-	game.lblScore.Render(game.Renderer)
 	game.Snake.Render(game.Renderer)
 	game.Food.Render(game.Renderer)
 
 	game.ui.Render(game.uiElements)
 
 	game.Renderer.Flush()
+}
+
+func (game *Game) initUiElements() {
+	game.uiElements = ui.NewComposite()
+
+	lblTitle := ui.NewLabel(TitleText, TitleX, TitleY)
+	game.uiElements.Append(lblTitle)
+
+	lblScore := ui.NewCounter(&game.score, ScoreX, ScoreY)
+	game.uiElements.Append(lblScore)
+
+	boxBorderRect := geometry.NewRect(BoxRectX - 1, BoxRectY - 1, BoxRectWidth + 2, BoxRectHeight + 2)
+	uiRect := ui.NewRect(boxBorderRect)
+	game.uiElements.Append(uiRect)
 }
 
 func initSnake(rect *geometry.Rect, length int) *Snake {
