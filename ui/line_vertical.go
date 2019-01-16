@@ -16,3 +16,13 @@ func (line *LineVertical) Render(renderer renderer.Renderer) {
 		renderer.Cell(line.x, y, line.ch)
 	}
 }
+
+func (line *LineVertical) GenerateCells() []Cell {
+	result := make([]Cell, line.y2 - line.y1, line.y2 - line.y1)
+
+	for y := line.y1; y < line.y2; y++ {
+		result = append(result, *NewCell(line.x, y, line.ch))
+	}
+
+	return result
+}

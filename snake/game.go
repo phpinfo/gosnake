@@ -28,39 +28,46 @@ const (
 )
 
 type Game struct {
-	score    int
-	Renderer renderer.Renderer
-	lblTitle *ui.Label
-	lblScore *Counter
-	Snake    *Snake
-	Box      *Rect
-	Food     *Food
-	isQuit   bool
-	isPause  bool
-	aPause   *Alert
-	fsm      *fsm.FSM
-	ui       *ui.UI
+	score      int
+	Renderer   renderer.Renderer
+	lblScore   *Counter
+	Snake      *Snake
+	Box        *geometry.Rect
+	Food       *Food
+	isQuit     bool
+	isPause    bool
+	fsm        *fsm.FSM
+	ui         *ui.UI
+	uiElements *ui.Composite
 }
 
 func NewGame() *Game {
 	var (
-		rect     = NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
+		rect     = geometry.NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
 		snake    = initSnake(rect, SnakeLength)
 		food     = initFood(rect, snake)
 		r        = renderer.NewTermboxRenderer()
 	)
 
+	uiElements := ui.NewComposite()
+
+	lblTitle := ui.NewLabel(TitleText, TitleX, TitleY)
+	uiElements.Append(lblTitle)
+
+	boxBorderRect := geometry.NewRect(BoxRectX - 1, BoxRectY - 1, BoxRectWidth + 2, BoxRectHeight + 2)
+	uiRect := ui.NewRect(boxBorderRect)
+	uiElements.Append(uiRect)
+
 	game := &Game{
-		score:    ScoreValue,
-		Renderer: r,
-		lblTitle: ui.NewLabel(TitleText, TitleX, TitleY),
-		Snake:    snake,
-		Box:      rect,
-		Food:     food,
-		isQuit:   false,
-		isPause:  false,
-		aPause:   initPauseAlert(rect),
-		ui:       ui.NewUI(r),
+		score:      ScoreValue,
+		Renderer:   r,
+		Snake:      snake,
+		Box:        rect,
+		Food:       food,
+		isQuit:     false,
+		isPause:    false,
+		ui:         ui.NewUI(r),
+		uiElements: uiElements,
 	}
 
 	lblScore := NewCounter(&game.score, geometry.NewPoint(ScoreX, ScoreY))
@@ -128,7 +135,7 @@ func (game *Game) tick() {
 }
 
 func (game *Game) isCollision() bool {
-	if !game.Box.Contains(game.Snake.Head()) {
+	if !game.Box.Contains(*game.Snake.Head()) {
 		return true
 	}
 
@@ -184,19 +191,17 @@ func (game *Game) render () {
 	game.Renderer.Clear()
 
 	game.lblScore.Render(game.Renderer)
-	game.Box.Render(game.Renderer)
 	game.Snake.Render(game.Renderer)
 	game.Food.Render(game.Renderer)
-	game.aPause.Render(game.Renderer)
 
-	game.ui.Render(game.lblTitle)
+	game.ui.Render(game.uiElements)
 
 	game.Renderer.Flush()
 }
 
-func initSnake(rect *Rect, length int) *Snake {
+func initSnake(rect *geometry.Rect, length int) *Snake {
 	var (
-		point = rect.LeftTopPoint.Add(rect.Dimensions.Width / 2, rect.Dimensions.Height - 2)
+		point = rect.LeftTopPoint.Add(rect.Width / 2, rect.Height - 2)
 		body = []*geometry.Point{point}
 	)
 
@@ -207,11 +212,11 @@ func initSnake(rect *Rect, length int) *Snake {
 	return NewSnake(body, DirectionUp)
 }
 
-func initFood(rect *Rect, snake *Snake) *Food {
+func initFood(rect *geometry.Rect, snake *Snake) *Food {
 	for {
 		var (
-			x = rand.Intn(rect.Dimensions.Width)
-			y = rand.Intn(rect.Dimensions.Height)
+			x = rand.Intn(rect.Width)
+			y = rand.Intn(rect.Height)
 			point = geometry.NewPoint(x, y).Add(rect.Left, rect.Top)
 		)
 
@@ -221,15 +226,15 @@ func initFood(rect *Rect, snake *Snake) *Food {
 	}
 }
 
-func initPauseAlert(rect *Rect) *Alert {
+func initPauseAlert(rect *geometry.Rect) *Alert {
 	text := "          PAUSED\n\n" +
 		    "<Press any key to continue>"
 
 	alert := NewAlert(text, geometry.NewPoint(0, 0))
 
 	point := geometry.NewPoint(
-		rect.Dimensions.Width / 2 - alert.getWidth() / 2 + rect.Left,
-		rect.Dimensions.Height / 2 - alert.getHeight() / 2 + rect.Top,
+		rect.Width / 2 - alert.getWidth() / 2 + rect.Left,
+		rect.Height / 2 - alert.getHeight() / 2 + rect.Top,
 	)
 
 	alert.Move(point)

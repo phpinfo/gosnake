@@ -9,7 +9,7 @@ import (
 type Alert struct {
 	lines   []string
 	point   *geometry.Point
-	rect    *Rect
+	rect    *geometry.Rect
 	visible bool
 }
 
@@ -26,7 +26,7 @@ func NewAlert(text string, point *geometry.Point) *Alert {
 
 func (alert *Alert) Move(point *geometry.Point) {
 	alert.point = point
-	alert.rect = NewRect(
+	alert.rect = geometry.NewRect(
 		point.X - 1,
 		point.Y - 1,
 		alert.getWidth() + 2,
@@ -39,7 +39,7 @@ func (alert *Alert) Render(renderer renderer.Renderer) {
 		return
 	}
 
-	alert.rect.Render(renderer)
+	//alert.rect.Render(renderer)
 
 	for dy, text := range alert.lines {
 		for dx, ch := range text {
