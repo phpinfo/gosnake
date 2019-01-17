@@ -42,10 +42,9 @@ type Game struct {
 
 func NewGame() *Game {
 	var (
-		rect     = geometry.NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
-		snake    = initSnake(rect, SnakeLength)
-		food     = initFood(rect, snake)
-		r        = renderer.NewTermboxRenderer()
+		rect  = geometry.NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
+		snake = initSnake(rect, SnakeLength)
+		r     = renderer.NewTermboxRenderer()
 	)
 
 	game := &Game{
@@ -53,12 +52,12 @@ func NewGame() *Game {
 		Renderer:   r,
 		Snake:      snake,
 		Box:        rect,
-		Food:       food,
 		isQuit:     false,
 		isPause:    false,
 		ui:         ui.NewUI(r),
 	}
 
+	game.initFood()
 	game.initUiElements()
 	game.initStateMachine()
 
@@ -114,7 +113,7 @@ func (game *Game) tick() {
 	if game.isFood() {
 		game.Snake.Eat()
 		game.score++
-		game.Food = initFood(game.Box, game.Snake)
+		game.moveFood()
 	}
 
 	game.render()
@@ -178,7 +177,6 @@ func (game *Game) render () {
 	game.Renderer.Clear()
 
 	game.Snake.Render(game.Renderer)
-	game.Food.Render(game.Renderer)
 
 	game.ui.Render(game.uiElements)
 
@@ -197,6 +195,9 @@ func (game *Game) initUiElements() {
 	boxBorderRect := geometry.NewRect(BoxRectX - 1, BoxRectY - 1, BoxRectWidth + 2, BoxRectHeight + 2)
 	uiRect := ui.NewRect(boxBorderRect)
 	game.uiElements.Append(uiRect)
+
+	uiFood := ui.NewFood(game.Food.Point)
+	game.uiElements.Append(uiFood)
 }
 
 func initSnake(rect *geometry.Rect, length int) *Snake {
@@ -212,16 +213,24 @@ func initSnake(rect *geometry.Rect, length int) *Snake {
 	return NewSnake(body, DirectionUp)
 }
 
-func initFood(rect *geometry.Rect, snake *Snake) *Food {
+func (game *Game) initFood() {
+	game.Food = NewFood(geometry.NewPoint(0, 0))
+	game.moveFood()
+}
+
+func (game *Game) moveFood() {
+	rect := game.Box
+
 	for {
 		var (
 			x = rand.Intn(rect.Width)
 			y = rand.Intn(rect.Height)
-			point = geometry.NewPoint(x, y).Add(rect.Left, rect.Top)
 		)
 
-		if !snake.Contains(point) {
-			return NewFood(point)
+		game.Food.Point.Move(x + rect.Left, y + rect.Top)
+
+		if !game.Snake.Contains(game.Food.Point) {
+			return
 		}
 	}
 }

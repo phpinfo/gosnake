@@ -15,3 +15,8 @@ func (point *Point) Add(x, y int) *Point {
 func (point *Point) Equals(point2 *Point) bool {
 	return point.X == point2.X && point.Y == point2.Y
 }
+
+func (point *Point) Move(x, y int) {
+	point.X = x
+	point.Y = y
+}
