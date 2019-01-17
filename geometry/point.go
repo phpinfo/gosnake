@@ -16,7 +16,12 @@ func (point *Point) Equals(point2 *Point) bool {
 	return point.X == point2.X && point.Y == point2.Y
 }
 
-func (point *Point) Move(x, y int) {
+func (point *Point) MoveTo(x, y int) {
 	point.X = x
 	point.Y = y
+}
+
+func (point *Point) Move(dx, dy int) {
+	point.X += dx
+	point.Y += dy
 }

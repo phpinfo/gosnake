@@ -29,43 +29,36 @@ const (
 
 type Game struct {
 	score      int
-	Renderer   renderer.Renderer
+	isQuit     bool
+	isPause    bool
 	Snake      *Snake
 	Box        *geometry.Rect
 	Food       *Food
-	isQuit     bool
-	isPause    bool
-	fsm        *fsm.FSM
 	ui         *ui.UI
 	uiElements *ui.Composite
+	uiSnake    *ui.Snake
+	fsm        *fsm.FSM
 }
 
 func NewGame() *Game {
-	var (
-		rect = geometry.NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
-		r    = renderer.NewTermboxRenderer()
-	)
-
 	game := &Game{
-		score:      ScoreValue,
-		Renderer:   r,
-		Box:        rect,
-		isQuit:     false,
-		isPause:    false,
-		ui:         ui.NewUI(r),
+		score:   ScoreValue,
+		isQuit:  false,
+		isPause: false,
 	}
 
+	game.initBox()
 	game.initSnake(SnakeLength, DirectionUp)
 	game.initFood()
-	game.initUiElements()
+	game.initUi()
 	game.initStateMachine()
 
 	return game
 }
 
 func (game *Game) Start() {
-	game.Renderer.Init()
-	defer game.Renderer.Close()
+	game.ui.Init()
+	defer game.ui.Close()
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -115,7 +108,9 @@ func (game *Game) tick() {
 		game.moveFood()
 	}
 
-	game.render()
+	game.updateUi()
+	game.ui.Render(game.uiElements)
+
 	time.Sleep(game.getMoveInterval())
 }
 
@@ -172,17 +167,10 @@ func (game *Game) initStateMachine() {
 	)
 }
 
-func (game *Game) render () {
-	game.Renderer.Clear()
+func (game *Game) initUi() {
+	termboxRenderer := renderer.NewTermboxRenderer()
+	game.ui = ui.NewUI(termboxRenderer)
 
-	game.Snake.Render(game.Renderer)
-
-	game.ui.Render(game.uiElements)
-
-	game.Renderer.Flush()
-}
-
-func (game *Game) initUiElements() {
 	game.uiElements = ui.NewComposite()
 
 	lblTitle := ui.NewLabel(TitleText, TitleX, TitleY)
@@ -197,6 +185,17 @@ func (game *Game) initUiElements() {
 
 	uiFood := ui.NewFood(game.Food.Point)
 	game.uiElements.Append(uiFood)
+
+	game.uiSnake = ui.NewPointCollection(game.Snake.Body)
+	game.uiElements.Append(game.uiSnake)
+}
+
+func (game *Game) updateUi() {
+	game.uiSnake.SetPoints(game.Snake.Body)
+}
+
+func (game *Game) initBox() {
+	game.Box = geometry.NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
 }
 
 func (game *Game) initSnake(length int, direction Direction) {
@@ -224,7 +223,7 @@ func (game *Game) moveFood() {
 			y = rand.Intn(game.Box.Height)
 		)
 
-		game.Food.Point.Move(x + game.Box.Left, y + game.Box.Top)
+		game.Food.Point.MoveTo(x + game.Box.Left, y + game.Box.Top)
 
 		if !game.Snake.Contains(game.Food.Point) {
 			return
