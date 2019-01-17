@@ -42,21 +42,20 @@ type Game struct {
 
 func NewGame() *Game {
 	var (
-		rect  = geometry.NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
-		snake = initSnake(rect, SnakeLength)
-		r     = renderer.NewTermboxRenderer()
+		rect = geometry.NewRect(BoxRectX, BoxRectY, BoxRectWidth, BoxRectHeight)
+		r    = renderer.NewTermboxRenderer()
 	)
 
 	game := &Game{
 		score:      ScoreValue,
 		Renderer:   r,
-		Snake:      snake,
 		Box:        rect,
 		isQuit:     false,
 		isPause:    false,
 		ui:         ui.NewUI(r),
 	}
 
+	game.initSnake(SnakeLength, DirectionUp)
 	game.initFood()
 	game.initUiElements()
 	game.initStateMachine()
@@ -200,9 +199,9 @@ func (game *Game) initUiElements() {
 	game.uiElements.Append(uiFood)
 }
 
-func initSnake(rect *geometry.Rect, length int) *Snake {
+func (game *Game) initSnake(length int, direction Direction) {
 	var (
-		point = rect.LeftTopPoint.Add(rect.Width / 2, rect.Height - 2)
+		point = game.Box.LeftTopPoint.Add(game.Box.Width / 2, game.Box.Height - 2)
 		body = []*geometry.Point{point}
 	)
 
@@ -210,7 +209,7 @@ func initSnake(rect *geometry.Rect, length int) *Snake {
 		body = append(body, point.Add(0, dy))
 	}
 
-	return NewSnake(body, DirectionUp)
+	game.Snake = NewSnake(body, direction)
 }
 
 func (game *Game) initFood() {
@@ -219,15 +218,13 @@ func (game *Game) initFood() {
 }
 
 func (game *Game) moveFood() {
-	rect := game.Box
-
 	for {
 		var (
-			x = rand.Intn(rect.Width)
-			y = rand.Intn(rect.Height)
+			x = rand.Intn(game.Box.Width)
+			y = rand.Intn(game.Box.Height)
 		)
 
-		game.Food.Point.Move(x + rect.Left, y + rect.Top)
+		game.Food.Point.Move(x + game.Box.Left, y + game.Box.Top)
 
 		if !game.Snake.Contains(game.Food.Point) {
 			return
